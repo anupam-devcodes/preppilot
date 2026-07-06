@@ -14,6 +14,10 @@ const getApiBaseUrl = () => {
   return process.env.API_BASE_URL || `http://localhost:${process.env.PORT || 5000}`;
 };
 
+const getClientUrl = () => {
+  return process.env.CLIENT_URL || "http://localhost:5173";
+};
+
 const registerUser = async (userData, avatarFile) => {
   const { fullName, email, password } = userData;
 
@@ -48,7 +52,7 @@ const registerUser = async (userData, avatarFile) => {
 
   await user.save();
 
-  const verificationUrl = `${getApiBaseUrl()}/api/v1/auth/verify-email/${verificationToken}`;
+  const verificationUrl = `${getClientUrl()}/verify-email/${verificationToken}`;
 
   await sendVerificationEmail({
     email: user.email,
@@ -111,7 +115,7 @@ const resendVerificationEmail = async (email) => {
 
   await user.save({ validateBeforeSave: false });
 
-  const verificationUrl = `${getApiBaseUrl()}/api/v1/auth/verify-email/${verificationToken}`;
+  const verificationUrl = `${getClientUrl()}/verify-email/${verificationToken}`;
 
   await sendVerificationEmail({
     email: user.email,
@@ -133,7 +137,7 @@ const forgotPassword = async (email) => {
 
   await user.save({ validateBeforeSave: false });
 
-  const resetUrl = `${getApiBaseUrl()}/api/v1/auth/reset-password/${resetToken}`;
+  const resetUrl = `${getClientUrl()}/reset-password/${resetToken}`;
 
   await sendPasswordResetEmail({
     email: user.email,
