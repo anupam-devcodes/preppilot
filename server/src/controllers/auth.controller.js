@@ -1,7 +1,10 @@
 import asyncHandler from "../utils/asyncHandler.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import authService from "../services/auth.service.js";
-import { accessTokenCookieOptions } from "../utils/cookieOptions.js";
+import {
+  accessTokenCookieOptions,
+  accessTokenClearCookieOptions,
+} from "../utils/cookieOptions.js";
 
 export const registerUser = asyncHandler(async (req, res) => {
   const result = await authService.registerUser(req.body, req.file);
@@ -33,6 +36,21 @@ export const loginUser = asyncHandler(async (req, res) => {
     .status(200)
     .cookie("accessToken", result.token, accessTokenCookieOptions)
     .json(new ApiResponse(200, result, "User logged in successfully"));
+});
+
+export const logoutUser = asyncHandler(async (req, res) => {
+  await authService.logoutUser(req.token);
+
+  return res
+    .status(200)
+    .clearCookie("accessToken", accessTokenClearCookieOptions)
+    .json(new ApiResponse(200, null, "User logged out successfully"));
+});
+
+export const getCurrentUser = asyncHandler(async (req, res) => {
+  return res
+    .status(200)
+    .json(new ApiResponse(200, req.user, "Current user fetched successfully"));
 });
 
 export const resendVerificationEmail = asyncHandler(async (req, res) => {

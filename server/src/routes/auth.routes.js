@@ -4,12 +4,15 @@ import {
   registerUser,
   verifyEmail,
   loginUser,
+  logoutUser,
+  getCurrentUser,
   resendVerificationEmail,
   forgotPassword,
   resetPassword,
 } from "../controllers/auth.controller.js";
 
 import { uploadAvatar } from "../middlewares/upload.middleware.js";
+import { protect } from "../middlewares/auth.middleware.js";
 import validate from "../middlewares/validate.middleware.js";
 
 import {
@@ -29,11 +32,11 @@ router.post(
   registerUser
 );
 
-router.post(
-  "/login",
-  validate(loginUserSchema),
-  loginUser
-);
+router.post("/login", validate(loginUserSchema), loginUser);
+
+router.post("/logout", protect, logoutUser);
+
+router.get("/me", protect, getCurrentUser);
 
 router.get("/verify-email/:token", verifyEmail);
 

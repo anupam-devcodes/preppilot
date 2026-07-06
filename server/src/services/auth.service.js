@@ -1,5 +1,7 @@
 import crypto from "crypto";
-
+import jwt from "jsonwebtoken";
+import BlacklistedToken from "../models/blacklistedToken.model.js";
+import { hashToken } from "../utils/token.utils.js";
 import User from "../models/user.model.js";
 import ApiError from "../utils/ApiError.js";
 import deleteLocalFile from "../utils/deleteLocalFile.js";
@@ -201,6 +203,35 @@ const loginUser = async (credentials) => {
   };
 };
 
+const logoutUser = async (token) => {
+  if (!token) {
+    throw new ApiError(401, "Access token is required");
+  }
+
+  const tokenHash = hashToken(token);
+
+  const decodedToken = jwt.decode(token);
+
+  const expiresAt = decodedToken?.exp
+    ? new Date(decodedToken.exp * 1000)
+    : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+
+  await BlacklistedToken.findOneAndUpdate(
+    { tokenHash },
+    {
+      tokenHash,
+      expiresAt,
+    },
+    {
+      upsert: true,
+      new: true,
+      setDefaultsOnInsert: true,
+    }
+  );
+
+  return true;
+};
+
 export default {
   registerUser,
   verifyEmail,
@@ -208,4 +239,5 @@ export default {
   forgotPassword,
   resetPassword,
   loginUser,
+  logoutUser,
 };
