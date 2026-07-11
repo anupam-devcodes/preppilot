@@ -33,13 +33,12 @@ const avatarFileFilter = (req, file, cb) => {
 const resumeFileFilter = (req, file, cb) => {
   const allowedTypes = [
     "application/pdf",
-    "application/msword",
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
   ];
 
   if (!allowedTypes.includes(file.mimetype)) {
     return cb(
-      new ApiError(400, "Only PDF, DOC, and DOCX resume files are allowed"),
+      new ApiError(400, "Only PDF and DOCX resume files are allowed"),
       false
     );
   }

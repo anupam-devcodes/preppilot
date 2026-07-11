@@ -122,6 +122,20 @@ const interviewReportSchema = new mongoose.Schema(
       default: "",
     },
 
+    resumeStats: {
+    characterCount: {
+        type: Number,
+        default: 0,
+    },
+    wordCount: {
+        type: Number,
+        default: 0,
+    },
+    parsedAt: {
+        type: Date,
+    },
+    },
+
     aiSummary: {
       type: String,
       default: "",
