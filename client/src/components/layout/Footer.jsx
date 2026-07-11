@@ -55,7 +55,7 @@ const Footer = () => {
             © 2026 Anupam Choubey · PrepPilot
           </p>
           <p className="text-dark-600 italic">
-            Personal full-stack AI project.
+            Made to be useful.
           </p>
         </div>
       </div>

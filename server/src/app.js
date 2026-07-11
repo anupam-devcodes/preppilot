@@ -4,6 +4,7 @@ import cookieParser from "cookie-parser";
 import path from "path";
 
 import authRoutes from "./routes/auth.routes.js";
+import interviewRoutes from "./routes/interview.routes.js";
 
 import notFound from "./middlewares/notFound.middleware.js";
 import errorHandler from "./middlewares/error.middleware.js";
@@ -31,6 +32,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/interviews", interviewRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
