@@ -2,6 +2,7 @@ import InterviewReport from "../models/interviewReport.model.js";
 import ApiError from "../utils/ApiError.js";
 import deleteLocalFile from "../utils/deleteLocalFile.js";
 import resumeParserService from "./resumeParser.service.js";
+import geminiService from "./gemini.service.js";
 
 const createInterviewReport = async ({ userId, reportData, resumeFile }) => {
   if (!resumeFile) {
@@ -19,8 +20,10 @@ const createInterviewReport = async ({ userId, reportData, resumeFile }) => {
     throw error;
   }
 
+  let report;
+
   try {
-    const report = await InterviewReport.create({
+    report = await InterviewReport.create({
       user: userId,
       title,
       targetRole,
@@ -41,14 +44,41 @@ const createInterviewReport = async ({ userId, reportData, resumeFile }) => {
       },
       status: "pending",
     });
+  } catch (error) {
+    deleteLocalFile(resumeFile.path);
+    throw error;
+  }
 
-    const createdReport = await InterviewReport.findById(report._id)
+  try {
+    const aiAnalysis = await geminiService.generateInterviewAnalysis({
+      resumeText: parsedResume.text,
+      jobDescription,
+      targetRole,
+      companyName,
+    });
+
+    report.matchScore = aiAnalysis.matchScore;
+    report.aiSummary = aiAnalysis.aiSummary;
+    report.strengths = aiAnalysis.strengths;
+    report.weaknesses = aiAnalysis.weaknesses;
+    report.skillGaps = aiAnalysis.skillGaps;
+    report.interviewQuestions = aiAnalysis.interviewQuestions;
+    report.status = "completed";
+    report.errorMessage = "";
+
+    await report.save();
+
+    const completedReport = await InterviewReport.findById(report._id)
       .select("-resumeText")
       .lean();
 
-    return createdReport;
+    return completedReport;
   } catch (error) {
-    deleteLocalFile(resumeFile.path);
+    report.status = "failed";
+    report.errorMessage = error.message || "AI analysis failed";
+
+    await report.save();
+
     throw error;
   }
 };
